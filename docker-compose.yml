@@ -1,6 +1,6 @@
 version : "3.3"
 services :
   web :
-     image : aadityarai02/django-notes-app:${BUILD_NUMBER}
+     image : 561030001202.dkr.ecr.ap-south-1.amazonaws.com/django-notes-app:${BUILD_NUMBER}
      ports :
          - "8000:8000"
