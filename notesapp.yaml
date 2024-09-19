@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: atum
+  name: django-notes-app
+  labels:
+    app: django-notes-app
+spec:
+  replicas: 3 # You can adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: django-notes-app
+  template:
+    metadata:
+      labels:
+        app: django-notes-app
+    spec:
+      containers:
+      - name: django-notes-app-container
+        image: 561030001202.dkr.ecr.ap-south-1.amazonaws.com/django-notes-app:${BUILD_NUMBER}
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-notes-app-service
+  labels:
+    app: django-notes-app
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80 # External port
+      targetPort: 8000 # Port on the container
+  selector:
+    app: django-notes-app

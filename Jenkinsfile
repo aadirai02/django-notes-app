@@ -5,7 +5,9 @@ pipeline {
         AWS_ACCOUNT_ID=561030001202
         AWS_DEFAULT_REGION="ap-south-1" 
         IMAGE_REPO_NAME="django-notes-app"
-        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+        REPOSITORY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+        EKS_CLUSTER_NAME="kristal-eks-8PHMzFir"
+        K8S_NAMESPACE="atum"
     }
     
     stages {
@@ -35,7 +37,7 @@ pipeline {
         //         }
         //     }
         // }
-        
+
         stage('Push to ECR') {
             steps {
                 withCredentials([[
@@ -59,7 +61,20 @@ pipeline {
 
         stage("Deploy") {
             steps {
-                sh "docker compose up -d"
+                withCredentials([[
+                $class: 'AmazonWebServicesCredentialsBinding',
+                accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                credentialsId: 'dev-user-aws-credentials']])
+                {
+                    script {
+                        // Update kubeconfig for EKS cluster
+                        sh "aws eks --region ${AWS_DEFAULT_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
+                        sh "sed -i 's|561030001202.dkr.ecr.ap-south-1.amazonaws.com/django-notes-app:latest|${REPOSITORY_URI}:${BUILD_NUMBER}|g' notesapp.yaml"
+                        sh "kubectl apply -f notesapp.yaml --namespace ${K8S_NAMESPACE}"
+                        sh "kubectl rollout status deployment/django-notes-app --namespace ${K8S_NAMESPACE}"
+
+                }
             }
         }
     }
