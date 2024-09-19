@@ -70,12 +70,13 @@ pipeline {
                     script {
                         // Update kubeconfig for EKS cluster
                         sh "aws eks --region ${AWS_DEFAULT_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
-                        sh "sed -i 's|561030001202.dkr.ecr.ap-south-1.amazonaws.com/django-notes-app:latest|${REPOSITORY_URI}:${BUILD_NUMBER}|g' notesapp.yaml"
-                        sh "kubectl apply -f notesapp.yaml --namespace ${K8S_NAMESPACE}"
-                        sh "kubectl rollout status deployment/django-notes-app --namespace ${K8S_NAMESPACE}"
-
+                        sh 'echo "Replacing with: ${REPOSITORY_URI}:${BUILD_NUMBER}"'
+                        sh 'sed -i "s|561030001202.dkr.ecr.ap-south-1.amazonaws.com/django-notes-app:\\${BUILD_NUMBER}|561030001202.dkr.ecr.ap-south-1.amazonaws.com/django-notes-app:${BUILD_NUMBER}|g" notesapp.yaml'
+                        sh "/home/ubuntu/bin/kubectl apply -f notesapp.yaml --namespace ${K8S_NAMESPACE}"
+                        sh "/home/ubuntu/bin/kubectl rollout status deployment/django-notes-app --namespace ${K8S_NAMESPACE}"
                 }
             }
+          }
         }
     }
 }
