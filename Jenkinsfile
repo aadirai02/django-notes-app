@@ -11,7 +11,7 @@ pipeline {
         }
         stage("Build & Test"){
             steps{
-                sh "docker build . -t notes-app-jenkins:latest"
+                sh "docker build . -t django-notes-app:latest"
             }
         }
         stage("Push to DockerHub"){
@@ -24,9 +24,9 @@ pipeline {
                         )
                     ]
                 ){
-                sh "docker image tag notes-app-jenkins:latest ${env.dockerHubUser}/notes-app-jenkins:${env.BUILD_NUMBER}"
+                sh "docker image tag django-notes-app:latest ${env.dockerHubUser}/django-notes-app:${env.BUILD_NUMBER}"
                 sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker push ${env.dockerHubUser}/notes-app-jenkins:${env.BUILD_NUMBER}"
+                sh "docker push ${env.dockerHubUser}/django-notes-app:${env.BUILD_NUMBER}"
                 }
             }
         }
