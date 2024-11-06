@@ -2,7 +2,7 @@ pipeline {
     
     agent any
     environment {
-        AWS_ACCOUNT_ID=561030001202
+        AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
         AWS_DEFAULT_REGION="ap-south-1" 
         IMAGE_REPO_NAME="django-notes-app"
         REPOSITORY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
